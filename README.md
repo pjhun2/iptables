@@ -1,6 +1,7 @@
 Ubuntu , Debian iptables config
 
 iptables OPTION
+
   --append  -A chain            Append to chain
   --check   -C chain            Check for the existence of a rule
   --delete  -D chain            Delete matching rule from chain
@@ -64,10 +65,15 @@ FORWARD : 서버를 통해서 나가는 , FORWARDING 되어 나가는 것들을 
 OUTPUT : 서버에서 나가는 것들을 정의하는 정책
 
 Example )
-
+접근제어
 iptable -A INPUT -s 192.168.0.0/24 -j DROP // 출발지 주소가 192.168.0.0 대역을 가진 IP주소들은 서버로 접근이 불가능함 , Ping, Service 등 연결이 제한됨
 iptables -A FORWARD -s 10.10.10.0/24 -i enp0s25 -j ACCEPT // 출발지 주소가 10.10.10.0 대역인 IP 주소들은 enp0s25 인터페이스를 통해 지나갈 수 있음
 iptables -A OUTPUT -s 192.168.0.100 -d 8.8.8.8 -j ACCEPT // 출발지 주소가 192.168.0.100 IP일 경우 8.8.8.8 주소로 가는 것들을 허용
+
+port 제어
+iptable -A INPUT -s 192.168.0.0/24 -p udp --dport 53 -j DROP // 출발지가 192.168.0.0/24인 대역에서 udp 53번 포트로 요청이 올 경우 DROP 시키는 정책
+
+-p tcp --dport 80  // -p udp --dport 53 등 다양하게 포트 제어 가능
 
 2. iptable NAT
 
@@ -83,4 +89,9 @@ iptables -t nat -A PREROUTING -s 10.10.10.0/24 -p tcp -i enp0s25 --dport 80 -j D
 iptables -t nat -A POSTROUTING -s 192.168.2.0/24 -o enp0s25 -j MASQUERADE // 192.168.2.0/24 대역의 IP는 enp0s25 인터페이스 주소로 NAT되어 외부와 통신되도록 설정 MASQUERADE가 외부와 연결이 가능하도록 설정해주는 기능
 
 
-iptables-save 
+iptables-save or iptables -L // 정책 설정 확인
+
+iptables-persistent 패키지 사용 시 /etc/iptables/rule.v4,6 에 추가됨
+dpkg-reconfigure iptables-persistent로 저장
+이 후에 재부팅 하여도 설정한 정책들이 적용됨
+
